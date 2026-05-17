@@ -1,26 +1,69 @@
-## დავალების ატვირთვა
-დავალება უნდა ატვირთოთ თქვენს პერსონალურ Github Classroom-ის რეპოზიტორიაში.
+# Assignment 3 — Vector and Hashset
 
-## კომპილაცია
+Stanford CS107 | Spring 2008
+
+## Overview
+
+Implementation of two generic container data structures in pure C — a dynamic array (`vector`) and a hash table (`hashset`) — without templates or STL. Uses raw memory management with `malloc`, `realloc`, `memcpy`, `memmove`, `qsort`, and `bsearch`.
+
+
+## How It Works
+
+### vector
+A dynamically resizing array that stores elements of any type via `void *`. Pre-allocates memory in chunks of `initialAllocation` size and grows automatically when full.
+
+| Function | Description |
+|---|---|
+| `VectorNew` | Initializes vector with element size and allocation chunk |
+| `VectorAppend` | Copies element to end, reallocates if needed |
+| `VectorInsert` | Inserts at position, shifts elements right with `memmove` |
+| `VectorDelete` | Removes at position, shifts elements left with `memmove` |
+| `VectorSearch` | Linear or binary search (`bsearch`) depending on `isSorted` |
+| `VectorSort` | Sorts using `qsort` with client-supplied comparator |
+| `VectorMap` | Iterates over all elements calling client function |
+
+### hashset
+A hash table built on top of `vector`. Each bucket is a `vector`; collisions are resolved by chaining. Client supplies hash function, compare function, and optional free function.
+
+| Function | Description |
+|---|---|
+| `HashSetNew` | Initializes array of `numBuckets` vectors |
+| `HashSetEnter` | Hashes element, inserts or replaces in bucket |
+| `HashSetLookup` | Hashes key, searches bucket for match |
+| `HashSetMap` | Iterates over all buckets and all elements |
+
+## File Structure
+
+| File | Description |
+|---|---|
+| `vector.c` | Full vector implementation |
+| `vector.h` | Vector interface and type definitions |
+| `hashset.c` | Full hashset implementation built on vector |
+| `hashset.h` | Hashset interface and type definitions |
+| `vector-test.c` | Vector test harness |
+| `hashset-test.c` | Hashset test harness |
+
+## Key Concepts
+
+- **`void *`** — type-erased pointer enabling generic storage
+- **`memcpy` vs `memmove`** — `memmove` used when source and destination overlap (shifts)
+- **`realloc`** — grows allocated memory when vector is full
+- **Chaining** — hash collisions stored in the same bucket's vector
+- **Client-supplied functions** — comparator, hash, free functions passed as pointers
+
+## Compilation
 ```sh
 make
 ```
 
-## ტესტებისთვის საჭირო data ფაილები
-`make` ის პირველი გაშვება ავტომატურად შექმნის data დირექტორიას ტესტებისთვის საჭირო ფაილებით.  
-თუ რატომღაც ეს ფაილები "დაგიზიანდათ", მათი თავიდან ჩამოტვირთვისთვის გაუშვით:
-```sh
-rm -rf data/
-make data
-```
 
-## ტესტირება
+## Test
 ```sh
 ./vector-test
 ./hashset-test
 ```
 
-`vector-test` და `hashset-test` აპლიკაციებს ეკრანზე გამოაქვს თუ როგორ იქცევა თქვენი ვექტორის და ჰეშსეტის იმპლემენტაცია. რომელიც შეგიძლიათ შეადაროთ `sample-output-vector.txt` და `sample-output-hashset.txt` ფაილებს რათა დარწმუნდეთ თქვენი იმპლემენტაციის სისწორეში.
+`vector-test` and `hashset-test`  `sample-output-vector.txt` and `sample-output-hashset.txt` 
 ```sh
 ./vector-test | diff sample-output-vector.txt -
 ./hashset-test | diff sample-output-hashset.txt -
