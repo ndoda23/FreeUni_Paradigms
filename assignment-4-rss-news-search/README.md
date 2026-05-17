@@ -1,9 +1,18 @@
-## დავალების ატვირთვა
-დავალება უნდა ატვირთოთ თქვენს პერსონალურ Github Classroom-ის რეპოზიტორიაში.
+# Assignment 4 — RSS News Feed Aggregator
 
-## საჭირო პაკეტები
-დაგჭირდებათ libcurl პაკეტის დაყენება
-```sh
+Stanford CS107 | Spring 2008
+
+## Overview
+
+A news search engine that fetches RSS feeds, indexes article content by word frequency,
+and lets the user query for articles by keyword. Built on top of the custom `vector`
+and `hashset` from Assignment 3.
+
+## Setup
+
+Install required packages:
+
+```bash
 dpkg --add-architecture i386
 apt update
 apt install gcc make
@@ -12,56 +21,65 @@ apt install libnsl-dev:i386
 apt install gcc-multilib
 ```
 
-## კომპილაცია
-```sh
+## Usage
+
+```bash
 make
+./rss-news-search
 ```
 
-## ტესტებისთვის საჭირო data ფაილები
-`make` ის პირველი გაშვება ავტომატურად შექმნის data დირექტორიას ტესტებისთვის საჭირო ფაილებით.  
-თუ რატომღაც ეს ფაილები "დაგიზიანდათ", მათი თავიდან ჩამოტვირთვისთვის გაუშვით:
-```sh
+The first `make` run automatically downloads the required data files into `data/`.
+To re-download them:
+
+```bash
 rm -rf data/
 make data
 ```
 
-## ტესტირება
-```sh
+## Testing
+
+```bash
 ./assn-4-checker-64 ./rss-news-search
 ./assn-4-checker-64 ./rss-news-search -m
 ```
 
-## ჰეშირების ფუნქცია
-For those of you in need of a hash function for strings,
-you can use the following, which is lifted from a textbook
-we used to use in CS106A.  You'll need to modify it so that
-it can be used by a hashset to store C strings (or structs
-keyed on C strings).
+## How It Works
 
-```cpp
-/** 
- * StringHash                     
- * ----------  
- * This function adapted from Eric Roberts' "The Art and Science of C"
- * It takes a string and uses it to derive a hash code, which   
- * is an integer in the range [0, numBuckets).  The hash code is computed  
- * using a method called "linear congruence."  A similar function using this     
- * method is described on page 144 of Kernighan and Ritchie.  The choice of                                                     
- * the value for the kHashMultiplier can have a significant effect on the                            
- * performance of the algorithm, but not on its correctness.                                                    
- * This hash function has the additional feature of being case-insensitive,  
- * hashing "Peter Pawlowski" and "PETER PAWLOWSKI" to the same code.  
- */  
+1. Fetches RSS feeds from major news sites
+2. Parses each article into individual words using `streamtokenizer`
+3. Filters out stop words (e.g. "the", "without")
+4. Indexes remaining words into a `hashset` mapping keywords → articles + frequency
+5. Accepts user queries and returns top 10 matching articles sorted by word count
 
+## File Structure
+
+| File | Description |
+|---|---|
+| `rss-news-search.c` | Main logic — indexing and querying |
+| `streamtokenizer.h/.c` | Breaks web page content into word tokens |
+| `urlconnection.h/.c` | Fetches content from URLs |
+| `data/stop-words.txt` | List of common words excluded from index |
+
+## Hash Function
+
+Uses a string hash based on linear congruence (adapted from Eric Roberts' *The Art and Science of C*). Case-insensitive — "Paris" and "paris" hash to the same bucket.
+
+```c
 static const signed long kHashMultiplier = -1664117991L;
-static int StringHash(const char *s, int numBuckets)  
-{            
-  int i;
-  unsigned long hashcode = 0;
-  
-  for (i = 0; i < strlen(s); i++)  
-    hashcode = hashcode * kHashMultiplier + tolower(s[i]);  
-  
-  return hashcode % numBuckets;                                
+
+static int StringHash(const char *s, int numBuckets) {
+    int i;
+    unsigned long hashcode = 0;
+    for (i = 0; i < strlen(s); i++)
+        hashcode = hashcode * kHashMultiplier + tolower(s[i]);
+    return hashcode % numBuckets;
 }
 ```
+
+## Key Concepts
+
+- **Stop words** — common words loaded into a `hashset` and ignored during indexing
+- **Index** — a `hashset` mapping each word to a list of articles and occurrence counts
+- **Deduplication** — same article not indexed twice (matched by URL or title+server)
+- **Case-insensitive** — queries and indexing use `tolower` and `strcasecmp`
+- **Buckets** — large prime number (1009 or 10007) for uniform hash distribution
