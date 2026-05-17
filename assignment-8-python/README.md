@@ -1,31 +1,50 @@
-## დავალების ატვირთვა
-დავალება უნდა ატვირთოთ თქვენს პერსონალურ Github Classroom-ის რეპოზიტორიაში.
+# Assignment 8 — DNA Alignment
 
-## დავალება
-გევალებათ გადააკეთოთ findOptimalAlignment ფუნქცია და სხვაობის შეფასების გარდა დააბრუნოთ დნმ-ის განლაგებები და დადებითი/უარყოფითი შეფასებები როგორც სტრიქონები.  
-დაბრუნებული შედეგი სისწორეზე შესამოწმებლად შეგიძლიათ გადასცეთ test ფუნქციას. გამოძახების მაგალითი იხილით main ფუნქციის დასაწყისში.
+Stanford CS107 | Spring 2008
 
-test ფუნქციის პარამეტრები და ტიპები:  
-    score          =  int    მაგალითი: -6  
-    plusScores     =  string მაგალითი: "  1   1  1"  
-    minusScores    =  string მაგალითი: "22 111 11 "  
-    strandAligned1 =  string მაგალითი: "  CAAGTCGC"  
-    strandAligned2 =  string მაგალითი: "ATCCCATTAC"  
+## Overview
 
-## ტესტირება
-python2.4 ვერსია:
+A DNA sequence alignment program written in Python. Uses recursive dynamic
+programming with memoization to find the optimal alignment of two DNA strands
+and generate the full alignment with match/mismatch scores.
+
+## Usage
+
+```bash
+# Python 2.4
 python solution.pyc
 
-python2.7 ვერსია:
-დავალების შესრულების შემდგომ, ტესტირებისთვის
-მიღებული შედეგი უნდა გადასცეთ test ფუნქციას.
-(შეინარჩუნეთ ციკლი (main-ში არსებული while) და ყოველი მიღებული
-რეზულტატი გადაეცით)
+# Python 2.7
+python solution.py
+```
 
-საწყის კოდში მოცემულია მაგალითი რომელსაც გადაეცემა ცარიელი რეზულტატები. test ფუნქცია დაბეჭდავს ტესტის რეზულტატს.
+## Testing
 
-test ფუნქციის string პარამეტრების სიგრძე უნდა იყოს ტოლი (ბოლოში თუ space-ებს გულისხმობთ, უნდა მიაწებოთ და შეავსოთ თანაბარ ზომამდე)
+The `test` function validates your alignment result. Pass all five outputs to it:
 
-*მემოიზაცია შემომდება დიდი სიგრძეებით/დროით, შეგიძლიათ პირობაში
-როგორც არის ახსნილი გატესტოთ დიდ სიგრძეებზე, მაგალითად 200 სიგრძეზე
-საშუალოდ რამდენიმე წუთზე (2) მეტს არ უნდა ანდომებდეს.
+```python
+test(score, plusScores, minusScores, strandAligned1, strandAligned2)
+```
+
+| Parameter | Type | Example |
+|---|---|---|
+| `score` | `int` | `-6` |
+| `plusScores` | `string` | `" 1 1 1"` |
+| `minusScores` | `string` | `"22 111 11 "` |
+| `strandAligned1` | `string` | `" CAAGTCGC"` |
+| `strandAligned2` | `string` | `"ATCCCATTAC"` |
+
+> All string parameters must be the same length — pad with trailing spaces if needed.
+
+## How It Works
+
+1. `findOptimalAlignment(strand1, strand2, cache)` recursively aligns two strands
+2. At each step it tries three options: match/mismatch both leading chars, skip from strand1, skip from strand2
+3. Returns a dictionary with keys `"strand1"`, `"strand2"`, and `"score"`
+4. **Memoization** — results are cached in a shared dictionary passed through recursion, reducing exponential time to polynomial
+
+## Task Summary
+
+- Extend `findOptimalAlignment` to return the full alignment strings alongside the score
+- Add memoization to handle strands up to length 60 within 10 seconds, and length 200 within ~2 minutes
+- Keep the `while` loop in `main` and pass every result to `test`
